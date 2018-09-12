@@ -3,6 +3,11 @@ require 'rails_helper'
 RSpec.describe TopController, :type => :controller do
   describe '#check' do
 
+    it '不正入力値チェック' do
+      post :check, { cards: 'C7 C6 C5 C4'}
+      expect(response).to redirect_to action: :index
+    end
+
     it 'ストレートフラッシュ判定' do
       post :check, { cards: 'C7 C6 C5 C4 C3'}
       expect(controller.instance_variable_get("@hand")).to eq 'ストレートフラッシュ'
