@@ -1,6 +1,11 @@
 class TopController < ApplicationController
   def index
-
+    if session[:cards] == nil
+      @cards = 'D1 D10 S9 C5 C4'
+    else
+      @cards = session[:cards]
+    end
+    @hand = session[:hand]
   end
 
   def check
@@ -8,6 +13,7 @@ class TopController < ApplicationController
     # 入力値チェック
     if params[:cards] !~ /\A([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])\z/
         flash[:notice] = "ちゃんと入力せい（例：H9 C9 S9 H1 C1）"
+        session[:cards] = params[:cards]
         redirect_to action: :index
     else
 
@@ -23,34 +29,35 @@ class TopController < ApplicationController
       if suits.uniq.size == 1
         # ストレートかどうかを判定
         if straight_patterns.include?(numbers)
-          @hand = "ストレートフラッシュ"
+          session[:hand] = "ストレートフラッシュ"
         else
-          @hand = "フラッシュ"
+          session[:hand] = "フラッシュ"
         end
       else
         # ストレートを先に判定
         if straight_patterns.include?(numbers)
-          @hand = "ストレート"
+          session[:hand] = "ストレート"
         else
           # 同じ数字のカードの枚数を数えて配列にして役を判定する
           arr = numbers.uniq.map {|e| numbers.count(e)}.sort
           case arr
           when [1, 4]
-            @hand = "フォー・オブ・ア・カインド"
+            session[:hand] = "フォー・オブ・ア・カインド"
           when [2, 3]
-            @hand = "フルハウス"
+            session[:hand] = "フルハウス"
           when [1, 1, 3]
-            @hand = "スリー・オブ・ア・カインド"
+            session[:hand] = "スリー・オブ・ア・カインド"
           when [1, 2, 2]
-            @hand = "ツーペア"
+            session[:hand] = "ツーペア"
           when [1, 1, 1, 2]
-            @hand = "ワンペア"
+            session[:hand] = "ワンペア"
           when [1, 1, 1, 1, 1]
-            @hand = "ハイカード"
+            session[:hand] = "ハイカード"
           end
         end
       end
-      render action: :index
+      session[:cards] = params[:cards]
+      redirect_to action: :index
     end
   end
 end

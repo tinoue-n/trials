@@ -1,10 +1,10 @@
 カードのソートと数字を半角スペース区切りで5枚分入力してください
-<form action="top/check" accept-charset="UTF-8" method="post">
+<form action="check" accept-charset="UTF-8" method="post">
 <!--  <input name="utf8" type="hidden" value="✓">-->
 <!--  <input type="hidden" name="_method" value="put">-->
   <input type="hidden" name="authenticity_token" value="UuE43/xiPFk63ogJGzqSIoI/GwFsLT0dI7aDS8Ca9IODy4exwGnIM8B1wtHk5CsTuqt+J0zP2Pv82LO3lajdCw==">
   <!--<p><label for="cards">Cards:</label></p>-->
-  <p><input type="text" name="cards" id="cards" value="S1 H3 D9 C13 S11" placeholder="S10 H11 D12 C13 H1"></p>
+  <p><input type="text" name="cards" id="cards" value="<%= @cards %>" placeholder="S10 H11 D12 C13 H1"></p>
   <p><input type="submit" name="commit" value="Check" id="check"></p>
 </form>
 <%= @hand %>
