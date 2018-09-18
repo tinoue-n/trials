@@ -3,11 +3,28 @@ require 'rails_helper'
 RSpec.describe TopController, :type => :controller do
   describe '#check' do
 
-    it '不正入力値チェック' do
+    # 異常系
+    it 'カード数が足りない' do
       post :check, { cards: 'C7 C6 C5 C4'}
       expect(response).to redirect_to action: :index
     end
 
+    it 'スート以外のアルファベット' do
+      post :check, { cards: 'B7 C6 C5 C4 D3'}
+      expect(response).to redirect_to action: :index
+    end
+
+    it 'スペース区切りがない' do
+      post :check, { cards: 'C7C6 C5 C4 D4'}
+      expect(response).to redirect_to action: :index
+    end
+
+    it '大文字' do
+      post :check, { cards: 'C7 C6 C5 C4 D４'}
+      expect(response).to redirect_to action: :index
+    end
+
+    # 正常系
     it 'ストレートフラッシュ判定' do
       post :check, { cards: 'C7 C6 C5 C4 C3'}
       expect(session[:hand]).to eq 'ストレートフラッシュ'
