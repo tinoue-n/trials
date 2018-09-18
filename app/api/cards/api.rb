@@ -26,9 +26,15 @@ module Cards
               error: "カードのソートと数字を半角スペース区切りで5枚分入力してください"
             }
             errors << error
+          elsif c.join.split.size != c.join.split.uniq.size
+            error = {
+              cards: c.join,
+              error: "カードが重複しています"
+            }
+            errors << error
           else
 
-            check_cards(c)
+            check_cards(c.join)
 
             # カードと判定した役をハッシュにして結果の配列に入れる
             r = {
@@ -39,6 +45,7 @@ module Cards
             }
             result << r
             @strengths << @strength
+
           end
         end
 
@@ -52,7 +59,6 @@ module Cards
             r.delete(:strength)
           end
         end
-
         # レスポンス
         {
           result: result,

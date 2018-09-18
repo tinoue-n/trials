@@ -10,7 +10,11 @@ class TopController < ApplicationController
 
     # 入力値チェック
     if params[:cards] !~ /\A([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])\z/
-      @message = "ちゃんと入力せい（例：H9 C9 S9 H1 C1）"
+      @message = "カードのソートと数字を半角スペース区切りで5枚分入力してください"
+      @cards   = params[:cards]
+      render action: :index
+    elsif params[:cards].split.size != params[:cards].split.uniq.size
+      @message = "カードが重複しています"
       @cards   = params[:cards]
       render action: :index
     else
