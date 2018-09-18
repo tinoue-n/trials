@@ -1,5 +1,6 @@
 module Cards
   class Root < Grape::API
+    # helpers Helpers::CheckCardsHelper
 
     # APIアクセスに接頭語を不可
     # ex) http://localhost:3000/api
