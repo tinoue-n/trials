@@ -53,7 +53,7 @@ module Cards
         result.each do |r|
           if r[:strength] == @strengths.max
             r[:best] = true
-            r.delete(:@strength)
+            r.delete(:strength)
           else
             r[:best] = false
             r.delete(:strength)
