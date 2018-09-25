@@ -1,4 +1,5 @@
 include CheckCardsHelper
+include ValidationCheckHelper
 module Cards
   class API < Grape::API
     resource "check" do
@@ -12,7 +13,6 @@ module Cards
       post do
 
         # 前処理
-        errors     = Array.new
         cards      = params[:cards].each_slice(1).to_a
         result     = Array.new
         @strengths = Array.new
@@ -20,20 +20,10 @@ module Cards
         cards.each do |c|
 
           # パラメータ形式チェック
-          if c.join !~ /\A([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])( )([DHSC][1-9]|[DHSC][1][0-3])\z/
-            error = {
-              cards: c.join,
-              error: "カードのソートと数字を半角スペース区切りで5枚分入力してください"
-            }
-            errors << error
-          elsif c.join.split.size != c.join.split.uniq.size
-            error = {
-              cards: c.join,
-              error: "カードが重複しています"
-            }
-            errors << error
-          else
+          validate(c.join)
 
+          if @errors == []
+            # 役を判定する
             check_cards(c.join)
 
             # カードと判定した役をハッシュにして結果の配列に入れる
@@ -62,7 +52,7 @@ module Cards
         # レスポンス
         {
           result: result,
-          error:  errors
+          error:  @errors
         }
       end
     end
