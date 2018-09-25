@@ -1,7 +1,7 @@
+include CheckCardsHelper
+include ValidationCheckHelper
 module Cards
   class API < Grape::API
-    include CheckCardsHelper
-    include ValidationCheckHelper
 
     resource "check" do
 
@@ -23,9 +23,11 @@ module Cards
 
           # パラメータ形式チェック
 
-          errors << validate_cards(c.join)
+          validate_cards(c.join)
 
-          if @errors == []
+          if @error.present?
+            errors << @error
+          else
             # 役を判定する
             check_cards(c.join)
 
@@ -55,7 +57,7 @@ module Cards
         # レスポンス
         {
           result: result,
-          error:  errors.compact
+          error:  errors
         }
       end
     end

@@ -1,7 +1,6 @@
 module ValidationCheckHelper
   def validate_cards(c)
-    @errors     = Array.new
-
+    @error = {}
     if c !~ /\A([DHSC][1-9]|[DHSC][1][0-3])(\s)([DHSC][1-9]|[DHSC][1][0-3])(\s)([DHSC][1-9]|[DHSC][1][0-3])(\s)([DHSC][1-9]|[DHSC][1][0-3])(\s)([DHSC][1-9]|[DHSC][1][0-3])\z/
       msgs = Array.new
       if c.split.count != 5
@@ -28,18 +27,16 @@ module ValidationCheckHelper
         msg = MessageDefinition::GeneralMessage
         msgs << msg
       end
-      error = {
+      @error = {
         cards: c,
         error: msgs
       }
-      @errors << error
     elsif c.split.size != c.split.uniq.size
-      error = {
+      @error = {
         cards: c,
         error: [MessageDefinition::DuplicatedCards]
       }
-      @errors << error
     end
-    @errors
+    @error
   end
 end
