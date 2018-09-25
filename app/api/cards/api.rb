@@ -1,7 +1,8 @@
-include CheckCardsHelper
-include ValidationCheckHelper
 module Cards
   class API < Grape::API
+    include CheckCardsHelper
+    include ValidationCheckHelper
+
     resource "check" do
 
       desc "役と最強フラグを返そう"
@@ -17,10 +18,12 @@ module Cards
         result     = Array.new
         @strengths = Array.new
 
+        errors = []
         cards.each do |c|
 
           # パラメータ形式チェック
-          validate(c.join)
+
+          errors << validate_cards(c.join)
 
           if @errors == []
             # 役を判定する
@@ -52,7 +55,7 @@ module Cards
         # レスポンス
         {
           result: result,
-          error:  @errors
+          error:  errors.compact
         }
       end
     end

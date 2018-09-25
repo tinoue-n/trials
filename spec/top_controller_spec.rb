@@ -43,7 +43,7 @@ RSpec.describe TopController, :type => :controller do
       post :check, { cards: 'C7 C6 C5 C4 C7' }
       expect(response).to be_success
       expect(response.status).to eq 200
-      expect(controller.instance_variable_get("@errors")).to eq("カードが重複しています")
+      expect(controller.instance_variable_get("@errors")).to eq(["カードが重複しています"])
     end
 
     # 正常系

@@ -2,11 +2,11 @@ module CheckCardsHelper
   def check_cards(cards)
     # ストレートの判定のためにパターン挙げる
     straight_patterns = [%w[1 2 3 4 5], %w[2 3 4 5 6], %w[3 4 5 6 7], %w[4 5 6 7 8], %w[5 6 7 8 9],
-                         %w[6 7 8 9 10], %w[7 8 9 10 11], %w[8 9 10 11 12], %w[9 10 11 12 13], %w[10 11 12 13 1]]
+                         %w[6 7 8 9 10], %w[7 8 9 10 11], %w[8 9 10 11 12], %w[9 10 11 12 13], %w[1 10 11 12 13]]
 
     # スートと番号を配列に入れる
     suits   = cards.to_s.gsub(/\d+/, "").split
-    numbers = cards.to_s.gsub(/[a-zA-Z]/, "").split.sort
+    numbers = cards.to_s.gsub(/[DHSC]/, "").split.sort
 
     # フラッシュかどうかを判定
     if suits.uniq.size == 1
