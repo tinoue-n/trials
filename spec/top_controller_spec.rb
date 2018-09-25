@@ -8,42 +8,42 @@ RSpec.describe TopController, :type => :controller do
       post :check, { cards: 'C7 C6 C5 C4' }
       expect(response).to be_success
       expect(response.status).to eq 200
-      expect(controller.instance_variable_get("@errors")).to eq(["カードは5枚分入力してください"])
+      expect(controller.instance_variable_get("@error")).to eq(["カードは5枚分入力してください"])
     end
 
     it 'スート以外のアルファベット' do
       post :check, { cards: 'B7 C6 C5 C4 D3' }
       expect(response).to be_success
       expect(response.status).to eq 200
-      expect(controller.instance_variable_get("@errors")).to eq(["スート（DHSC）、数字、半角スペース以外の文字が含まれています"])
+      expect(controller.instance_variable_get("@error")).to eq(["スート（DHSC）、数字、半角スペース以外の文字が含まれています"])
     end
 
     it 'スペース区切りがない' do
       post :check, { cards: 'C7C6 C5 C4 D4' }
       expect(response).to be_success
       expect(response.status).to eq 200
-      expect(controller.instance_variable_get("@errors")).to eq(["カードは5枚分入力してください", "カード同士は半角スペースで区切ってください"])
+      expect(controller.instance_variable_get("@error")).to eq(["カードは5枚分入力してください", "カード同士は半角スペースで区切ってください"])
     end
 
     it '全角' do
       post :check, { cards: 'C7 C6 C5 C4 D４' }
       expect(response).to be_success
       expect(response.status).to eq 200
-      expect(controller.instance_variable_get("@errors")).to eq(["スート（DHSC）、数字、半角スペース以外の文字が含まれています", "全角文字が含まれています"])
+      expect(controller.instance_variable_get("@error")).to eq(["スート（DHSC）、数字、半角スペース以外の文字が含まれています", "全角文字が含まれています"])
     end
 
     it '1~13以外の数字' do
       post :check, { cards: 'C72 C6 C5 C4 D4' }
       expect(response).to be_success
       expect(response.status).to eq 200
-      expect(controller.instance_variable_get("@errors")).to eq(["カードの数字は1~13で入力してください"])
+      expect(controller.instance_variable_get("@error")).to eq(["カードの数字は1~13で入力してください"])
     end
 
     it '重複' do
       post :check, { cards: 'C7 C6 C5 C4 C7' }
       expect(response).to be_success
       expect(response.status).to eq 200
-      expect(controller.instance_variable_get("@errors")).to eq(["カードが重複しています"])
+      expect(controller.instance_variable_get("@error")).to eq(["カードが重複しています"])
     end
 
     # 正常系

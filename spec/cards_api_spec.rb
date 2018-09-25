@@ -49,39 +49,38 @@ RSpec.describe Cards, :type => :request do
         json = JSON.parse(response.body)
         expect(response).to be_success
         expect(response.status).to eq 201
-        expect(json["error"][0]["error"]).to eq 'カードが重複しています'
+        expect(json["error"][0]["error"]).to eq ['カードが重複しています']
       end
     end
+
     describe '複数' do
       it '同一エラーが二回' do
         post '/api/cards/check', { cards: ['C7 C6 C4 C4 C4', 'C7 C6 C4 C4 C4'] }
         json = JSON.parse(response.body)
         expect(response).to be_success
         expect(response.status).to eq 201
-        expect(json["error"][0]["error"]).to eq 'カードが重複しています'
+        expect(json["error"][0]["error"]).to eq ['カードが重複しています']
+        expect(json["error"][1]["error"]).to eq ['カードが重複しています']
       end
       it '二種類のエラー' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'S12 C12 D12 S5 C3'] }
+        post '/api/cards/check', { cards: ['C7 C6 C4 C4 C4', 'C7 C6 C5 C4 D44'] }
         json = JSON.parse(response.body)
         expect(response).to be_success
         expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'スリー・オブ・ア・カインド'
-        expect(json["result"][1]["best"]).to eq false
+        expect(json["error"][0]["error"]).to eq ['カードが重複しています']
+        expect(json["error"][1]["error"]).to eq ['カードの数字は1~13で入力してください']
       end
       it '正常とエラー' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'S12 C12 D12 S5 C3'] }
+        post '/api/cards/check', { cards: ['C7 C6 C5 C4 C3', 'C7 C6 C4 C4 C4'] }
         json = JSON.parse(response.body)
         expect(response).to be_success
         expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'スリー・オブ・ア・カインド'
-        expect(json["result"][1]["best"]).to eq false
+        expect(json["result"][0]["hand"]).to eq 'ストレートフラッシュ'
+        expect(json["error"][0]["error"]).to eq ['カードが重複しています']
       end
     end
   end
+
   describe '正常系' do
     describe '単体' do
       it 'ストレートフラッシュ判定' do
@@ -156,6 +155,7 @@ RSpec.describe Cards, :type => :request do
         expect(json["result"][0]["hand"]).to eq 'ハイカード'
       end
     end
+
     describe '複数役' do
       it 'ストレートフラッシュvsフラッシュ' do
         post '/api/cards/check', { cards: ['C7 C6 C5 C4 C3', 'H1 H12 H10 H5 H3'] }
@@ -168,289 +168,14 @@ RSpec.describe Cards, :type => :request do
         expect(json["result"][1]["best"]).to eq false
       end
 
-      it 'ストレートフラッシュvsストレート' do
-        post '/api/cards/check', { cards: ['C7 C6 C5 C4 C3', 'S8 S7 H6 H5 S4'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'ストレートフラッシュ'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ストレート'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'ストレートフラッシュvsフォー・オブ・ア・カインド' do
-        post '/api/cards/check', { cards: ['C7 C6 C5 C4 C3', 'D5 D6 H6 S6 C6'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'ストレートフラッシュ'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'フォー・オブ・ア・カインド'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'ストレートフラッシュvsフルハウス' do
-        post '/api/cards/check', { cards: ['C7 C6 C5 C4 C3', 'H9 C9 S9 H1 C1'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'ストレートフラッシュ'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'フルハウス'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'ストレートフラッシュvsスリー・オブ・ア・カインド' do
-        post '/api/cards/check', { cards: ['C7 C6 C5 C4 C3', 'S12 C12 D12 S5 C3'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'ストレートフラッシュ'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'スリー・オブ・ア・カインド'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'ストレートフラッシュvsツーペア' do
-        post '/api/cards/check', { cards: ['C7 C6 C5 C4 C3', 'H13 D13 C2 D2 H11'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'ストレートフラッシュ'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ツーペア'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'ストレートフラッシュvsワンペア' do
-        post '/api/cards/check', { cards: ['C7 C6 C5 C4 C3', 'C10 S10 S6 H4 H2'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'ストレートフラッシュ'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ワンペア'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'ストレートフラッシュvsハイカード' do
-        post '/api/cards/check', { cards: ['C7 C6 C5 C4 C3', 'D1 D10 S9 C5 C4'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'ストレートフラッシュ'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ハイカード'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フォー・オブ・ア・カインドvsフルハウス' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'H9 C9 S9 H1 C1'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フォー・オブ・ア・カインド'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'フルハウス'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フォー・オブ・ア・カインドvsフラッシュ' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'H1 H12 H10 H5 H3'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フォー・オブ・ア・カインド'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'フラッシュ'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フォー・オブ・ア・カインドvsストレート' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'S8 S7 H6 H5 S4'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フォー・オブ・ア・カインド'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ストレート'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フォー・オブ・ア・カインドvsスリー・オブ・ア・カインド' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'S12 C12 D12 S5 C3'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フォー・オブ・ア・カインド'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'スリー・オブ・ア・カインド'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フォー・オブ・ア・カインドvsツーペア' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'H13 D13 C2 D2 H11'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フォー・オブ・ア・カインド'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ツーペア'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フォー・オブ・ア・カインドvsワンペア' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'C10 S10 S6 H4 H2'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フォー・オブ・ア・カインド'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ワンペア'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フォー・オブ・ア・カインドvsハイカード' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'D1 D10 S9 C5 C4'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フォー・オブ・ア・カインド'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ハイカード'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フルハウスvsフラッシュ' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'H1 H12 H10 H5 H3'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'フラッシュ'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フルハウスvsストレート' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'S8 S7 H6 H5 S4'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ストレート'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フルハウスvsスリー・オブ・ア・カインド' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'S12 C12 D12 S5 C3'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'スリー・オブ・ア・カインド'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フルハウスvsツーペア' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'H13 D13 C2 D2 H11'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ツーペア'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フルハウスvsワンペア' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'C10 S10 S6 H4 H2'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ワンペア'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フルハウスvsハイカード' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'D1 D10 S9 C5 C4'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ハイカード'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フラッシュvsストレート' do
-        post '/api/cards/check', { cards: ['H1 H12 H10 H5 H3', 'S8 S7 H6 H5 S4'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ストレート'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
       it 'フラッシュvsスリー・オブ・ア・カインド' do
         post '/api/cards/check', { cards: ['H1 H12 H10 H5 H3', 'S12 C12 D12 S5 C3'] }
         json = JSON.parse(response.body)
         expect(response).to be_success
         expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
+        expect(json["result"][0]["hand"]).to eq 'フラッシュ'
         expect(json["result"][0]["best"]).to eq true
         expect(json["result"][1]["hand"]).to eq 'スリー・オブ・ア・カインド'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フラッシュvsツーペア' do
-        post '/api/cards/check', { cards: ['H1 H12 H10 H5 H3', 'H13 D13 C2 D2 H11'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ツーペア'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フラッシュvsワンペア' do
-        post '/api/cards/check', { cards: ['H1 H12 H10 H5 H3', 'C10 S10 S6 H4 H2'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ワンペア'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'フラッシュvsハイカード' do
-        post '/api/cards/check', { cards: ['H1 H12 H10 H5 H3', 'D1 D10 S9 C5 C4'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ハイカード'
-        expect(json["result"][1]["best"]).to eq false
-      end
-
-      it 'ストレートvs' do
-        post '/api/cards/check', { cards: ['D5 D6 H6 S6 C6', 'S8 S7 H6 H5 S4'] }
-        json = JSON.parse(response.body)
-        expect(response).to be_success
-        expect(response.status).to eq 201
-        expect(json["result"][0]["hand"]).to eq 'フルハウス'
-        expect(json["result"][0]["best"]).to eq true
-        expect(json["result"][1]["hand"]).to eq 'ストレート'
         expect(json["result"][1]["best"]).to eq false
       end
     end

@@ -13,9 +13,9 @@ class TopController < ApplicationController
     # 入力値チェック
     validate_cards(params[:cards])
 
-    if @errors != []
+    if @error.present?
       @cards  = params[:cards]
-      @errors = @errors[0][:error]
+      @error = @error[:error]
       render action: :index
     else
       check_cards(params[:cards])
